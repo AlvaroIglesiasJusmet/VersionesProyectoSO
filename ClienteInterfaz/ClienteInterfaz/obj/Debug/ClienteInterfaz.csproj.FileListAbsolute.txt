@@ -1,0 +1,10 @@
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\obj\Debug\ClienteInterfaz.csprojAssemblyReference.cache
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\obj\Debug\ClienteInterfaz.Form1.resources
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\obj\Debug\ClienteInterfaz.Properties.Resources.resources
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\obj\Debug\ClienteInterfaz.csproj.GenerateResource.cache
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\obj\Debug\ClienteInterfaz.csproj.CoreCompileInputs.cache
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\bin\Debug\ClienteInterfaz.exe.config
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\bin\Debug\ClienteInterfaz.exe
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\bin\Debug\ClienteInterfaz.pdb
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\obj\Debug\ClienteInterfaz.exe
+C:\Users\Álvaro\SO\ClienteInterfaz\ClienteInterfaz\obj\Debug\ClienteInterfaz.pdb
