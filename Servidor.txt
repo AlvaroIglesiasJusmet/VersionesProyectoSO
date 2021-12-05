@@ -1,14 +1,16 @@
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <stdio.h>
-#include <string.h>
-#include <mysql.h>
-#include <unistd.h>
 #include <netinet/in.h>
-#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <mysql.h>
 #include <pthread.h>
+#define MAX 1000
 
-typedef struct {
+typedef struct {          //Lista de conectados
 	char nombre [20];
 	int socket;
 } Conectado;
@@ -16,18 +18,140 @@ typedef struct {
 	Conectado conectados [100];
 	int num;
 } ListaConectados;
+
 //meter las consultas fuera del bucle del server
 int contador;
 int numsocket;
 int sockets[100];
+
 ListaConectados MiLista;
 char misConectados [200];
+
 
 //Estructura necesaria para acceso excluyente
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
+typedef struct{
+	Conectado conectados[2];
+	int ID;
+	int num;
+}Partida;
+
+typedef Partida partidas[MAX]; //tabla de partidas
+partidas misPartidas;
+
+int PonJugadorPartida (Partida *partida,char nombre[20],int socket)
+{
+	int encontrado=0;
+	int i=0;
+	if (partida->num==3)
+		return -1;
+	else
+	{
+		while (i<partida->num && encontrado==0 )
+		{
+			if (strcmp(partida->conectados[i].nombre,nombre)==0)
+			{
+				encontrado=1;
+				break;
+			}
+			i=i+1;
+		}
+		if (encontrado==0) {
+			printf("%s anadido correctamente en la partida %d\n",nombre,partida->ID);
+			strcpy(partida->conectados[partida->num].nombre,nombre);
+			partida->conectados[partida->num].socket=socket;
+			partida->num=partida->num+1;
+			printf("numero de jugadores en la partida %d = %d\n",partida->ID,partida->num);
+			return 0;
+		}
+		else
+			return -2;
+	}
+}
+
+int DameSocketJugadorPartida (Partida partida, char nombreU[20]){
+	//Devuelve el socket o -1 si no esta en la lista
+	int i=0;
+	int encontrado=0;
+	while ((i< partida.num) && !encontrado)
+	{
+		if (strcmp(partida.conectados[i].nombre,nombreU)==0)
+			encontrado =1;
+		if(!encontrado)
+			i=i+1;
+	}
+	if (encontrado)
+		return partida.conectados [i].socket;
+	else
+		return -1;
+}
+
+
+
+
+void Inicializar_Tabla_Partidas(partidas Tabla)
+{
+	printf("Tabla inicializada correctamente\n");
+	int i;
+	for (i=0;i<100;i++)
+	{
+		Tabla[i].num=0;
+		
+	}
+}
+int PonPartida(partidas Tabla,Partida partida) //funcion para insertar una partida en la tabla de partidas; retorna 0 si la partida
+	//se puede aniadir correctamente, retorna -1 si no ha podido aniadir
+{
+	int encontrado;
+	int i=0;
+	while ((i<100) && !encontrado)
+	{
+		if (Tabla[i].num==0)
+		{
+			encontrado=1;
+		}
+		if (!encontrado)
+		{
+			i=i+1;
+		}
+	}
+	if (encontrado)
+	{
+		printf("Partida %d anadida correctamente en la tabla\n",partida.ID);
+		Tabla[i]=partida;
+		return 0;
+	}
+	else
+		return -1;
+}
+int DamePosicionPartidaID(partidas Tabla,int ID) // esta funcion busca una partida, DENTRO DE LA TABLA DE PARTIDAS, a partir de su ID QUE SE PASA COMO PARAMETRO
+{//retorna la posicion o si no encuentra la partida retorna -1
+	int i=0;
+	int encontrado;
+	while (i<100)
+	{
+		if (Tabla[i].ID==ID)
+		{
+			encontrado=1;
+			break;
+		}
+		i=i+1;
+	}
+	if (encontrado)
+	{
+		return i;
+	}
+	else
+		return -1;
+	
+}
+
 int DameSocket (ListaConectados *lista, char nombreU[20]){
 	//Devuelve el socket o -1 si no esta en la lista
+printf("el usuario es: %s\n", nombreU);
+printf("Conectado 0: %s, %d\n", lista->conectados[0].nombre, lista->conectados[0].socket);
+printf("Conectado 1: %s, %d\n", lista->conectados[1].nombre, lista->conectados[1].socket);
 	int i=0;
 	int encontrado=0;
 	while ((i< lista->num) && !encontrado)
@@ -38,7 +162,7 @@ int DameSocket (ListaConectados *lista, char nombreU[20]){
 			i=i+1;
 	}
 	if (encontrado)
-		return lista->conectados [i].socket;
+		return lista->conectados[i].socket;
 	else
 		return -1;
 }
@@ -155,6 +279,11 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 		char respuesta[512];
 		int ret;
 		char notificacion[20];
+		
+		char anfitrion [20];
+		char invitado[20];
+		char invitacion[100];
+		int IDpartida = 1;   
 	 
 	
 		MYSQL *conn;
@@ -196,12 +325,13 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 			char *p = strtok(peticion,"/");
 			
 			int codigo =  atoi (p);
+			int numPartida;
 			// Ya tenemos el c?digo de la petici?n
 			char nombreU[20];
 			char contrasenya[30];
 			
-			if (codigo ==0) // pide desconectar
-		
+		    if (codigo ==0) // pide desconectar
+				
 			{
 				//peticion de desconexi?n
 				int eliminado=Eliminar (&MiLista,nombreU); //eliminar de la lista de conectados
@@ -211,15 +341,14 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 			else
 				{
 				strcpy(respuesta,"0/Te has desconectado correctamente");
-			    char conectados[1000];
-			    DameConectados(&MiLista,conectados);
 			    }
+                             
 			    write (sock_conn, respuesta, strlen(respuesta));
 			    terminar=1;
 			}
 			
 			
-			if (codigo ==1)//Piden loguearse 
+			else if (codigo ==1)//Piden loguearse 
 				
 			{
 				
@@ -229,7 +358,7 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 				strcpy(contrasenya,p);
 				printf ("Codigo: %d, Nombre: %s, Password: %s\n", codigo, nombreU, contrasenya);
 				printf("Inicia log\n");
-				int log = UsuarioContrasenya(conn,respuesta,nombreU,contrasenya,&MiLista,sock_conn,notificacion,socket);
+				int log = UsuarioContrasenya(conn,respuesta,nombreU,contrasenya,&MiLista,notificacion, sock_conn);
 				printf("Acaba log\n");
 				if (log==-1)
 				{
@@ -239,25 +368,25 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 				}
 				if (log==0) 
 				{
-					Pon (&MiLista, nombreU, socket);
+					Pon (&MiLista, nombreU, sock_conn);
 					sprintf(respuesta,"1/SI");
 					write (sock_conn,respuesta, strlen(respuesta));
 					printf ("Respuesta: %s\n", respuesta);
 					
 				}
 			}
-			if (codigo ==1)
+			
+			if (codigo ==1) //mutex
 			{
 				pthread_mutex_lock( &mutex ); //No me interrumpas ahora
 				contador = contador +1;       //incrementamos contador para la lista de conectados
 				pthread_mutex_unlock( &mutex); //ya puedes interrumpirme
 				
-				
 			}
 
                         
 			
-			if ( (codigo == 1) || (codigo==0) )
+			if ( (codigo == 1) || (codigo==0) ) // para la ista de conectados
 			{
 			
 				DameConectados (&MiLista, misConectados);
@@ -272,13 +401,13 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
             
 			}
 			
-			if (codigo == 5) //piden registrarse
+			else if (codigo == 5) //piden registrarse
 			{
 				char respuesta[80];
-				char nombre[80];
+				char nombreU[80];
 				char contrasenya[80];
 				char *p=strtok(NULL,"/");
-				strcpy(nombre,p);
+				strcpy(nombreU,p);
 				p= strtok(NULL,"/");	
 				strcpy(contrasenya,p);
 				printf("Inicia log\n");
@@ -290,16 +419,17 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 					int  reg = AnyadirUsuario(nombreU,contrasenya);
 					if (reg==0)
 					{
-						printf("Se ha anadido correctamente\n");	
+						printf("Se ha anadido correctamente\n");
+						sprintf(respuesta,"2/Registrado"); // se ha registrado correctamente
+						write (sock_conn,respuesta, strlen(respuesta));
+						printf ("Respuesta: %s\n", respuesta);
 					}
 					
 					if (reg==-2)
 					{
 						printf("Ha habido un error\n");
 					}
-					sprintf(respuesta,"2/Registrado"); // se ha registrado correctamente
-					write (sock_conn,respuesta, strlen(respuesta));
-					printf ("Respuesta: %s\n", respuesta);
+					
 				}
 				
 				if (log==0) //existe el usuario
@@ -312,9 +442,11 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 				
 			}
 			
-			if (codigo==2) //pide los ganadores q han ganado a juan
+			else if (codigo==2) //pide los ganadores q han ganado a juan
 			{
-				printf("he entrado en el 2\n");  
+				
+				char *p=strtok(NULL,"/");
+				numPartida= atoi(p);
 				
 				char mensaje[150];
 				mensaje[0]= '\0';
@@ -324,7 +456,7 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 				
 				if (Ganador==2)
 				{
-					printf("he entrado en ganadores=0\n");
+
 					write(sock_conn,mensaje,strlen(mensaje));
 				}
 				if (Ganador==-2)
@@ -341,8 +473,10 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 				}
 				
 			}
-			if (codigo==3) // pide los ganadores de un cierto dia
+			else if (codigo==3) // pide los ganadores de un cierto dia
 			{
+				char *p=strtok(NULL,"/");
+				numPartida= atoi(p);
 				char mensaje1 [100];
 				mensaje1[0]= '\0';
 				int Ganadores = JugadoresDia(mensaje1);
@@ -369,12 +503,14 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 					write(sock_conn,mensaje1,strlen(mensaje1));
 				}
 			}
-			if (codigo==4) // pide los puntos de juan
+			else if (codigo==4) // pide los puntos de juan
 			{   
+				char *p=strtok(NULL,"/");
+				numPartida= atoi(p);
 				printf("Estoy en codigo 4\n");
 				int puntos = DamePuntosJuan();
 				char Spuntos[1000];
-				sprintf(Spuntos, "3/%d", puntos);
+				sprintf(Spuntos, "3/%d/%d", numPartida, puntos );
 				printf("Los puntos de Juan son: %s\n",Spuntos);
 				
 				if (puntos==-2)
@@ -391,8 +527,126 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 					write(sock_conn,Spuntos,strlen(Spuntos));
 				}
 			}
-		
-			if (codigo ==-2)
+			
+			else if (codigo ==7) //un anfitron esta enviando invitaciones para jugar, enviamos la invitacion recibiendo la peticion del anfitron
+			{ 
+				IDpartida = IDpartida + 1;
+				p = strtok( NULL, "/");
+				strcpy (anfitrion, p);
+				int pos=DamePosicion(&MiLista,anfitrion);
+				Partida partida;	
+				partida.ID=IDpartida;
+				int sockk=DameSocket(&MiLista,anfitrion);
+				printf("%d\n",sockk);
+				int anadir_anfitrion= PonJugadorPartida(&partida,anfitrion,sockk);			
+				p = strtok( NULL, "/");
+				sprintf(respuesta,"7/0/%d",IDpartida);
+				int nInvitadosConectados=0;
+				char invitadosConectados[100];
+				char invC[100];
+				while (p!=NULL)
+				{//enviamos las invitaciones
+					strcpy (invitado, p);
+					int socket_invitado=DameSocket(&MiLista,invitado); 
+					printf("%d\n",socket_invitado);
+					if (socket_invitado==-1)
+					{//el jugador invitado ya no esta en la lista 
+						printf("El jugador %s se ha desconectado\n",invitado);
+					}
+					else
+					{
+				    sprintf(invitacion,"7/%d/%s",IDpartida,anfitrion); //mensaje de invitacion que se envia a cada invitado
+					printf("invitacion : %s al jugador %s\n",invitacion,invitado);
+					nInvitadosConectados=nInvitadosConectados+1;
+					sprintf(invC,"%s/",invitado);
+					if (nInvitadosConectados==1)
+					{
+						sprintf(invitadosConectados,"%s",invC);
+						
+					}
+					else
+					{
+						strcat(invitadosConectados,invC);
+					}
+					write (socket_invitado,invitacion, strlen(invitacion));
+					}			
+					p = strtok( NULL, "/");
+					
+				}
+				partida.num = nInvitadosConectados;
+				PonPartida(misPartidas,partida);
+			}
+			else if (codigo ==8) //recibimos respuesta del invitado
+			{ 
+				char respuestaInv[100];
+				char respuestaAnfitrion[100];
+				char partidas_actuales[1000];
+				p = strtok( NULL, "/");
+				strcpy(anfitrion,p);
+				p = strtok( NULL, "/");
+				IDpartida= atoi(p);
+				int sock=DameSocket(&MiLista,anfitrion);
+				p = strtok( NULL, "/");
+				strcpy (invitado, p);
+				p = strtok( NULL, "/");
+				strcpy(respuestaInv,p);
+				p = strtok( NULL, "/");
+				int res=atoi(p);
+				int pos_partida= DamePosicionPartidaID(misPartidas,IDpartida);
+				if (res==0)
+				{
+					printf("Jugador %s no acepta por lo tanto eliminado de la partida\n",invitado);
+				}
+				else
+				{
+					int pos_inv=DamePosicion(&MiLista,invitado);
+					int ponA=PonJugadorPartida(&misPartidas[pos_partida],invitado,MiLista.conectados[pos_inv].socket);
+					int sock_inv=DameSocketJugadorPartida(misPartidas[pos_partida],invitado);
+					sprintf(respuestaAnfitrion,"8/%d/%s/%s",IDpartida,invitado,respuestaInv);
+					write (sock,respuestaAnfitrion, strlen(respuestaAnfitrion));	
+					
+				}
+				
+			}
+				
+			else if (codigo==9) // enviar mensaje por el chat global 
+		{
+			
+			p=strtok(NULL,"/");
+			char autor [20];
+		        strcpy(autor,p);
+			p=strtok(NULL,"/");
+			char mensaje [20];
+			strcpy(mensaje,p);
+			sprintf(notificacion,"9/%s/%s",autor,mensaje);
+			int j;
+			for (j=0;j<numsocket;j++)
+				{
+					write (sockets[j],notificacion,strlen(notificacion));
+					printf ("Respuesta: %s\n", notificacion);
+				}
+            
+		}
+			else if (codigo==10) //enviar mensaje por el chat del juego del form 2
+			{
+				p = strtok( NULL, "/");
+				IDpartida= atoi(p);
+				p=strtok(NULL,"/");
+				char autor [20];
+				strcpy(autor,p);
+				p=strtok(NULL,"/");
+				char mensaje [20];
+				strcpy(mensaje,p);
+				sprintf(notificacion,"10/%d/%s/%s",IDpartida,autor,mensaje);
+				int pos= DamePosicionPartidaID(misPartidas,IDpartida);
+				for (int j=0;j<misPartidas[pos].num;j++)// enviamos mensaje a los otros jugadores de la partida
+				{
+					printf("Notificacion que envia el servidor: %s al socket:%d \n",notificacion,misPartidas[pos].conectados[j].socket);
+					write (misPartidas[pos].conectados[j].socket,notificacion,strlen(notificacion));
+				}
+			}
+				
+			else if (codigo ==-2)
 			{
 				
 				printf ("Respuesta: %s\n", respuesta);
@@ -405,7 +659,7 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 		close(sock_conn); 
 }
 
-    int UsuarioContrasenya (MYSQL *conn, char respuesta[80],char nombreU[80], char contrasenya[80],ListaConectados *MiLista, char notificacion[100], int sock_conn, int socket)
+    int UsuarioContrasenya (MYSQL *conn, char respuesta[80],char nombreU[80], char contrasenya[80],ListaConectados *MiLista, char notificacion[100], int sock_conn)
     {  
 	
 	MYSQL_RES *resultado;
@@ -715,7 +969,7 @@ int Pon (ListaConectados *lista,char nombreU[20],int socket){ //funcion para int
 	//htonl formatea el numero que recibe al formato necesario
 	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
 	// establecemos el puerto de escucha
-	serv_adr.sin_port = htons(50016);
+	serv_adr.sin_port = htons(50017);
 	if (bind(sock_listen, (struct sockaddr *) &serv_adr, sizeof(serv_adr)) < 0)
 		printf ("Error al bind");
 	
