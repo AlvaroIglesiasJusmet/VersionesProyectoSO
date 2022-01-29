@@ -19,36 +19,42 @@ namespace ClienteInterfaz
         Thread atender;
         int nForm = 0;
         string autor;
-        string autor10;
+
+        
         string mensaje_chat;
-        string mensaje_chat10;
+       
+
         public string mensaje_gamers;
         public int cont_invitados = 0;
         string usuarioMaquina;
         List<String> invitar_gamers = new List<String>(); //lista de invitados
-        List<Form2> formularios = new List<Form2>();
+        List<Form2> formularios = new List<Form2>(); // lista de invitados
         bool anadirInv = true; //para poder añadir a los invitados a una partida
 
-        delegate void DelegadoListaConectados(int NumConectados, string[] trozos);
+
+
+        delegate void DelegadoListaConectados(int NumConectados, string[] trozos); //lista de conectados
         delegate void DelegadoParaFormulario(Thread atender); //atiende mensajes servidor
         delegate void DelegadoParaEnviarChatGlobal(string autor9, string mensaje); //chat del form 1
-        delegate void DelegadoParaEnviarChatJuego(int partida10, string autor10, string mensaje10); //chat del form 2
-       
+        delegate void DelegadoParaEnviarChatJuego(int partida, string autor, string mensaje); //chat del form 2
+        delegate void DelegadoEmpezarPartida(int partida, int i, int nPregTrivial); //para iniciar una partida jugadores que dicen YES
+        delegate void DelegadoParaEnviarPregunta(int partida20, string nombre20, string pregunta, string opcionA, string opcionB, string opcionC, string respuesta); //preguntas del juego
+        delegate void DelegadoParaEnviarGanador(string GanadorPartida, int numPartida); //enviamos a la partida correspondiente el ganador
         public Form1()
         {
             InitializeComponent();
-
+            
         }
 
-        public void ServicioPartida(string nombre, int partida) // thread que se ocupa de las nuevas partidas
+        public void ServicioPartida(string nombre, int partida, int nPreg) // thread que se ocupa de las nuevas partidas
         {
 
-            ThreadStart ts = delegate { PonerMarchaFormulario(nombre, partida); };
+            ThreadStart ts = delegate { PonerMarchaFormulario(nombre, partida, nPreg); };
             Thread T = new Thread(ts);
             T.Start();
         }
 
-        public void PonerEnGrid(int NumConectados, string[] trozos)
+        public void PonerEnGrid(int NumConectados, string[] trozos) //funcion que pone en el GRID a los conectados
         {
             if (NumConectados == 0)
                 dataGridView1.Rows.Clear();
@@ -56,13 +62,41 @@ namespace ClienteInterfaz
             {
                 dataGridView1.RowCount = NumConectados;
                 dataGridView1.ColumnCount = 1;
-                for (int n = 2; n < trozos.Length;) // añadimos a los usuarios al datagridview
+                for (int n = 2; n < trozos.Length;)
                 {
                     dataGridView1.Rows[n - 2].Cells[0].Value = trozos[n];
                     n++;
                 }
             }
             
+        }
+
+        public void PartidaStart(int partida, int i, int nPreguntas) //funcion que permite que se abra el formulario 2 con la partida para los jugadores que han dicho YES
+        {
+            
+            if (i == 0)
+            {
+                ServicioPartida(Invitado1.Text, partida, nPreguntas);
+            }
+
+            if ((Invitado2.Text != null) && (i == 1))
+            {
+                ServicioPartida(Invitado2.Text, partida, nPreguntas);
+            }
+            if ((Invitado3.Text != null) && (i == 2))
+            {
+                ServicioPartida(Invitado3.Text, partida, nPreguntas);
+            }
+            if ((Invitado4.Text != null) && (i == 3))
+            {
+                ServicioPartida(Invitado4.Text, partida, nPreguntas);
+            }
+            if ((Invitado5.Text != null) && (i == 4))
+            {
+                ServicioPartida(Invitado5.Text, partida, nPreguntas);
+            }
+
+
         }
         public void RecibirChat(string autor, string msg) //funcion para el chat del Formulario Principal
         {
@@ -78,24 +112,24 @@ namespace ClienteInterfaz
 
         private void AtenderServidor()
         {
-            while(true)
+            while (true)
             {
                 //Recibimos mensaje del servidor
                 byte[] msg2 = new byte[200];
                 server.Receive(msg2);
 
+
                 
-                int nForm;
                 string mensaje = Encoding.ASCII.GetString(msg2).Split('\0')[0];
                 string[] trozos = mensaje.Split('/');
                 int codigo = Convert.ToInt32(trozos[0]);
                 switch (codigo)
                 {
-                   
+
 
                     case 1: //quieren loguearse
 
-                        
+
                         if (trozos[1] == "SI")
                         {
 
@@ -112,11 +146,11 @@ namespace ClienteInterfaz
 
                     case 2: //piden registrarse
 
-                      
+
                         if (trozos[1] == "Registrado")
                         {
                             MessageBox.Show("Te has registrado correctamente");
-                            
+
                         }
 
                         else
@@ -125,9 +159,25 @@ namespace ClienteInterfaz
                         }
                         break;
 
-                    case 3: //pide los puntos de Juan
-                        nForm = Convert.ToInt32(trozos[1]);
-                        formularios[nForm].TomaPuntosJuan(trozos[2]);
+                    case 40: //recibimos puntos de un jugador
+                        int puntos40= Convert.ToInt32(trozos[1]);
+                        int partida40  = Convert.ToInt32(trozos[2]);
+                        string nombre40 = trozos[3];
+                        int n = 0;
+                        bool res = false;
+
+                        while ((n < nForm) && (res == false))
+
+                        {
+
+                            if ((formularios[n].DameNumPartida() == partida40) && (formularios[n].DameJugador() == nombre40))
+                            {
+                                formularios[n].ReciboPuntosJugador(puntos40);
+                                res = true;
+                            }
+
+                            n++;
+                        }
                         break;
 
                     case 4: //recibo notificacion de Lista de Conectados
@@ -137,7 +187,7 @@ namespace ClienteInterfaz
                         break;
 
                     case 7: //enviamos las invitaciones
-                      
+
                         string anfitrion = trozos[2];
                         int partida = Convert.ToInt32(trozos[1]);
                         string MessageBoxTitle = "Invitación de partida de Trivial";
@@ -151,7 +201,6 @@ namespace ClienteInterfaz
                                 respuesta_invitation = "8/" + anfitrion + "/" + partida + "/" + textBoxNombre.Text + "/" + Convert.ToString(result) + "/1";
                                 byte[] accept = System.Text.Encoding.ASCII.GetBytes(respuesta_invitation);
                                 server.Send(accept);
-                                ServicioPartida(usuarioMaquina, partida);
                                 break;
 
 
@@ -170,13 +219,33 @@ namespace ClienteInterfaz
                         string invitado = trozos[2];
                         string respuesta_inv = trozos[3];
                         MessageBox.Show("Respuesta del invitado " + invitado + " a la partida " + partida + " del juego  es " + respuesta_inv);
-                        if (respuesta_inv == "Yes")
-                        {
-                          
-                            ServicioPartida(usuarioMaquina, partida);
-                           
+                        break;
 
-                        }
+                    case 25: //enviamos notificacion a todos y creamos la partida (todos los invitados han aceptado)
+
+                        partida = Convert.ToInt32(trozos[1]);
+                        int NumInvitados = Convert.ToInt32(trozos[2]);
+                        int NumJugadores = NumInvitados + 1;
+                        string anfitrion25 = trozos[3];
+                        int nPreguntas = Convert.ToInt32(trozos[4]);
+                        int i = 0;
+                        while (i < NumJugadores)
+                        {
+                            string MessageBoxContent1 = " Va a empezar la partida ";
+                            string MessageBoxTitle1 = "Partida de Trivial";
+                            DialogResult result1 = MessageBox.Show(MessageBoxContent1, MessageBoxTitle1, MessageBoxButtons.OK);
+
+                            switch (result1)
+                            {
+                                case DialogResult.OK:
+
+                                    DelegadoEmpezarPartida delegado25 = new DelegadoEmpezarPartida(PartidaStart);
+                                    this.Invoke(delegado25, new object[] { partida, i, nPreguntas });
+                                    i++;
+                                    break;
+                                  }
+                             }
+                        
                         break;
 
                     case 9: //Enviar mensajes mediante el chat del formulario 1
@@ -188,12 +257,36 @@ namespace ClienteInterfaz
 
                     case 10: //recibo mensajes del chat2
                         int partida10 = Convert.ToInt32(trozos[1]);
-                        autor10 = trozos[2];
-                        mensaje_chat10 = trozos[3];
+                        string autor10 = trozos[2];
+                        string mensaje_chat10 = trozos[3];
                         DelegadoParaEnviarChatJuego delegado10 = new DelegadoParaEnviarChatJuego(EnviarChatForm);
                         this.Invoke(delegado10, new object[] { partida10, autor10, mensaje_chat10 });
                         break;
+
+                    case 20: //recibo la pregunta del servidor
+                        int partida20 = Convert.ToInt32(trozos[1]);
+                        string nombre20 = trozos[2];
+                        string pregunta = trozos[3];
+                        string opcionA = trozos[4];
+                        string opcionB = trozos[5];
+                        string opcionC = trozos[6];
+                        string respuesta = trozos[7];
+                        DelegadoParaEnviarPregunta delegado20 = new DelegadoParaEnviarPregunta(EnviarPregunta);
+                        this.Invoke(delegado20, new object[] {partida20, nombre20, pregunta, opcionA, opcionB, opcionC, respuesta });
+                        break;
+
+
+                    case 30: //recibo Ganador
+                        string Ganador = trozos[1];
+                        int IDpartida = Convert.ToInt32(trozos[2]);
+                        DelegadoParaEnviarGanador delegado30 = new DelegadoParaEnviarGanador(EnviarGanador);
+                        this.Invoke(delegado30, new object[] { Ganador, IDpartida });
+                        break;
                 }
+
+                
+
+
 
             }
         }
@@ -228,32 +321,68 @@ namespace ClienteInterfaz
 
         }
 
-        private void PonerMarchaFormulario(string nombre, int partida) 
+        private void PonerMarchaFormulario(string nombre, int partida, int nTotalPreg) //creamos formulario para cada jugador
         {
             nForm = nForm + 1;
-            int cont = partida;
-            Form2 f = new Form2(cont, server, nombre);
+            
+            Form2 f = new Form2(partida, server, nombre, nTotalPreg);
             formularios.Add(f);
             f.ShowDialog();
 
         }
 
         
-        public void EnviarChatForm(int partida10, string autor10, string mensaje_chat)
+        public void EnviarChatForm(int partida10, string autor10, string mensaje_chat10) //enviar mensaje chat del form 2
         {//metodo para enviar chat al form correspondiente
-            int n = 0;
+            int n;
 
             for (n = 0; n < nForm; n++)
             {
-                if (formularios[n].DameNumForm() == partida10)
+                if (formularios[n].DameNumPartida() == partida10)
                 {
-                    formularios[n].ReciboMensaje(autor10, mensaje_chat);
+                    formularios[n].ReciboMensaje(autor10, mensaje_chat10);
                 }
 
             }
         }
 
-            private void button3_Click(object sender, EventArgs e)
+        public void EnviarPregunta(int partida20, string nombre20, string pregunta, string opcionA, string opcionB, string opcionC, string respuesta) //enviamos pregunta al form2
+        {
+            
+            int n = 0;
+            bool res = false;
+
+            while ((n < nForm) && (res == false))
+            
+            {
+                
+                if ((formularios[n].DameNumPartida() == partida20) && (formularios[n].DameJugador() == nombre20))
+                {
+                    formularios[n].ReciboPregunta(pregunta, opcionA, opcionB, opcionC, respuesta);
+                    res = true;
+                }
+
+                n++;
+                
+                
+
+            }
+        }
+
+        public void EnviarGanador(string Ganador, int IDpartida)//enviamos ganador al form2
+        {
+            int n;
+
+            for (n = 0; n < nForm; n++)
+            {
+                if ((formularios[n].DameNumPartida() == IDpartida))
+                {
+                    formularios[n].ReciboGanador(Ganador);
+                }
+
+            }
+        }
+        private void button3_Click(object sender, EventArgs e)
         {
            
         }
@@ -420,7 +549,7 @@ namespace ClienteInterfaz
 
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e) // Funcion para que no se quede colgado si cerramos form 1
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e) // Funcion para que no se quede bloqueado si cerramos form 1
                                                                               // desde la pestaña
         {
             //Mensaje de desconexión 
@@ -452,7 +581,7 @@ namespace ClienteInterfaz
             server.Send(msg);
         }
 
-        private void Crear_Partida_Click(object sender, EventArgs e)
+        private void Crear_Partida_Click(object sender, EventArgs e) //crear partida con múltiples invitados
         {
             if (invitar_gamers.Count() == 0)
             {
@@ -506,9 +635,28 @@ namespace ClienteInterfaz
                 MessageBox.Show("Ningún usuario añadido");
             }
         }
-        
-    
-   }
+
+        private void comoSeJuegaToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("El juego consiste en contestar preguntas de 3 categorías diferentes: historia, deporte y ciencia. Tendrás 60 segundos para girar" +
+                "la ruleta y contestar a cada pregunta. Marca la opción que creas correcta. También podrás escribir a tus oponentes o pedir los puntos de un jugador. " +
+                "Al final de la partida se revelará el ganador. Suerte! ");
+        }
+
+        private void comoInvitoAMisAmigosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Para invitar a tus amigos observe los jugadores que estan conectados, presione su nombre y a continuación presione el boton de 'Añadir a partida'. " +
+                "Solo podeis ser 5 jugadores en la partida");
+        }
+
+        private void normasDeComportamientoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("1)Respetar a todos los jugadores de la comunidad. " +
+                "2)No usar vocabulario ilícito en el chat. " +
+                "3)Las preguntas tienen que responderse sin uso de ayuda externa, solo con el conocimiento de uno mismo." +
+                " 4)Es un juego, no pasa nada si pierdes ");
+        }
+    }
 }
 
 

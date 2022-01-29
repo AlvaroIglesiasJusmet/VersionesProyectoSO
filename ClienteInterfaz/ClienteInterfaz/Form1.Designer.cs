@@ -29,6 +29,7 @@ namespace ClienteInterfaz
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.Button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.textBoxNombre = new System.Windows.Forms.TextBox();
@@ -53,9 +54,19 @@ namespace ClienteInterfaz
             this.Invitado3 = new System.Windows.Forms.RichTextBox();
             this.Invitado2 = new System.Windows.Forms.RichTextBox();
             this.Invitado1 = new System.Windows.Forms.RichTextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.comoSeJuegaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.mENUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.comoSeJuegaToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.comoInvitoAMisAmigosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.normasDeComportamientoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // Button1
@@ -95,6 +106,7 @@ namespace ClienteInterfaz
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Location = new System.Drawing.Point(59, 221);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
@@ -105,6 +117,7 @@ namespace ClienteInterfaz
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Location = new System.Drawing.Point(59, 271);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
@@ -183,9 +196,9 @@ namespace ClienteInterfaz
             this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.mensajeChat);
             this.groupBox1.Controls.Add(this.ChatMensajes);
-            this.groupBox1.Location = new System.Drawing.Point(387, 59);
+            this.groupBox1.Location = new System.Drawing.Point(387, 128);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(349, 430);
+            this.groupBox1.Size = new System.Drawing.Size(349, 418);
             this.groupBox1.TabIndex = 15;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "CHAT GLOBAL";
@@ -193,7 +206,7 @@ namespace ClienteInterfaz
             // button3
             // 
             this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(234, 332);
+            this.button3.Location = new System.Drawing.Point(234, 366);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(90, 40);
             this.button3.TabIndex = 2;
@@ -204,7 +217,7 @@ namespace ClienteInterfaz
             // mensajeChat
             // 
             this.mensajeChat.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.mensajeChat.Location = new System.Drawing.Point(21, 341);
+            this.mensajeChat.Location = new System.Drawing.Point(21, 375);
             this.mensajeChat.Name = "mensajeChat";
             this.mensajeChat.Size = new System.Drawing.Size(180, 22);
             this.mensajeChat.TabIndex = 1;
@@ -213,7 +226,7 @@ namespace ClienteInterfaz
             // 
             this.ChatMensajes.Location = new System.Drawing.Point(21, 26);
             this.ChatMensajes.Name = "ChatMensajes";
-            this.ChatMensajes.Size = new System.Drawing.Size(303, 286);
+            this.ChatMensajes.Size = new System.Drawing.Size(303, 317);
             this.ChatMensajes.TabIndex = 0;
             this.ChatMensajes.Text = "";
             // 
@@ -230,6 +243,7 @@ namespace ClienteInterfaz
             // 
             // groupBox2
             // 
+            this.groupBox2.BackColor = System.Drawing.Color.Transparent;
             this.groupBox2.Controls.Add(this.button4);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.Invitado5);
@@ -241,9 +255,10 @@ namespace ClienteInterfaz
             this.groupBox2.Controls.Add(this.Crear_Partida);
             this.groupBox2.Controls.Add(this.InvitarBttn);
             this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Location = new System.Drawing.Point(742, 59);
+            this.groupBox2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.groupBox2.Location = new System.Drawing.Point(742, 128);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(544, 433);
+            this.groupBox2.Size = new System.Drawing.Size(544, 418);
             this.groupBox2.TabIndex = 17;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "JUEGA CON TUS AMIGOS";
@@ -316,12 +331,82 @@ namespace ClienteInterfaz
             this.Invitado1.TabIndex = 17;
             this.Invitado1.Text = "";
             // 
+            // label5
+            // 
+            this.label5.BackColor = System.Drawing.Color.Transparent;
+            this.label5.Font = new System.Drawing.Font("Ravie", 19.8F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(242, 46);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(719, 60);
+            this.label5.TabIndex = 18;
+            this.label5.Text = "BATTLE QUIZ";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.comoSeJuegaToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(185, 28);
+            // 
+            // comoSeJuegaToolStripMenuItem
+            // 
+            this.comoSeJuegaToolStripMenuItem.Name = "comoSeJuegaToolStripMenuItem";
+            this.comoSeJuegaToolStripMenuItem.Size = new System.Drawing.Size(184, 24);
+            this.comoSeJuegaToolStripMenuItem.Text = "Como se juega?";
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mENUToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1329, 28);
+            this.menuStrip1.TabIndex = 20;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // mENUToolStripMenuItem
+            // 
+            this.mENUToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.comoSeJuegaToolStripMenuItem1,
+            this.comoInvitoAMisAmigosToolStripMenuItem,
+            this.normasDeComportamientoToolStripMenuItem});
+            this.mENUToolStripMenuItem.Name = "mENUToolStripMenuItem";
+            this.mENUToolStripMenuItem.Size = new System.Drawing.Size(65, 24);
+            this.mENUToolStripMenuItem.Text = "MENU";
+            // 
+            // comoSeJuegaToolStripMenuItem1
+            // 
+            this.comoSeJuegaToolStripMenuItem1.Name = "comoSeJuegaToolStripMenuItem1";
+            this.comoSeJuegaToolStripMenuItem1.Size = new System.Drawing.Size(205, 26);
+            this.comoSeJuegaToolStripMenuItem1.Text = "¿Como se juega?";
+            this.comoSeJuegaToolStripMenuItem1.Click += new System.EventHandler(this.comoSeJuegaToolStripMenuItem1_Click);
+            // 
+            // comoInvitoAMisAmigosToolStripMenuItem
+            // 
+            this.comoInvitoAMisAmigosToolStripMenuItem.Name = "comoInvitoAMisAmigosToolStripMenuItem";
+            this.comoInvitoAMisAmigosToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
+            this.comoInvitoAMisAmigosToolStripMenuItem.Text = "¿Como invito a mis amigos?";
+            this.comoInvitoAMisAmigosToolStripMenuItem.Click += new System.EventHandler(this.comoInvitoAMisAmigosToolStripMenuItem_Click);
+            // 
+            // normasDeComportamientoToolStripMenuItem
+            // 
+            this.normasDeComportamientoToolStripMenuItem.Name = "normasDeComportamientoToolStripMenuItem";
+            this.normasDeComportamientoToolStripMenuItem.Size = new System.Drawing.Size(281, 26);
+            this.normasDeComportamientoToolStripMenuItem.Text = "Normas de comportamiento";
+            this.normasDeComportamientoToolStripMenuItem.Click += new System.EventHandler(this.normasDeComportamientoToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.BackgroundImage = global::ClienteInterfaz.Properties.Resources.fondo_final1;
             this.ClientSize = new System.Drawing.Size(1329, 592);
+            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button7);
@@ -332,6 +417,7 @@ namespace ClienteInterfaz
             this.Controls.Add(this.textBoxNombre);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.Button1);
+            this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -341,6 +427,9 @@ namespace ClienteInterfaz
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
+            this.contextMenuStrip1.ResumeLayout(false);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -372,6 +461,14 @@ namespace ClienteInterfaz
         private System.Windows.Forms.RichTextBox Invitado2;
         private System.Windows.Forms.RichTextBox Invitado1;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem comoSeJuegaToolStripMenuItem;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem mENUToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem comoSeJuegaToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem comoInvitoAMisAmigosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem normasDeComportamientoToolStripMenuItem;
     }
 }
 

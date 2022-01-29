@@ -74,6 +74,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -87,6 +88,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pngegg.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ruleta.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ruleta1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\flecha %281%29.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fondoquiz.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\escenario.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fondofinal.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fondo final1.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
